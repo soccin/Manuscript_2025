@@ -31,13 +31,16 @@ suppressPackageStartupMessages({
   require(tidyverse)
 })
 
+# Suppress lifecycle warnings from tidygenomics
+options(lifecycle_verbosity = "quiet")
+
 # Read genomic bins and assign bin IDs
-bins = read_tsv(BINFILE, col_names = FALSE) |>
+bins = read_tsv(BINFILE, col_names = FALSE, show_col_types=F) |>
   mutate(X2 = X2 + 1) |>
   mutate(BIN = sprintf("B%05d", row_number()))
 
 # Read paired-end mapping data
-map = read_tsv(MAPFILE, col_names = FALSE)
+map = read_tsv(MAPFILE, col_names = FALSE, show_col_types=F)
 
 # Check for empty input
 if (nrow(map) == 0) {
