@@ -7,7 +7,8 @@ suppressPackageStartupMessages({
 .load_lpsA_X_ <- function() {
     load("raw/lpsA/lpsA.rda")
     tibble(lpsA$X) %>%
-        tibble::rownames_to_column("bin.id")
+        tibble::rownames_to_column("bin.id") %>%
+        gather(cellID,tcn,-bin.id)
 }
 
 source("cache_db.R")
