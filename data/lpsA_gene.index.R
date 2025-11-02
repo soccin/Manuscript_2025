@@ -6,7 +6,7 @@ suppressPackageStartupMessages({
 
 .load_lpsA_gene.index_ <- function() {
     load("raw/lpsA/lpsA.rda")
-    lpsA$gene.index %>% tibble::rownames_to_column("Cell_ID") %>% tibble
+    lpsA$gene.index %>% tibble::rownames_to_column("cellID") %>% tibble
 }
 
 source("cache_db.R")
