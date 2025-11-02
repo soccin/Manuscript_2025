@@ -6,7 +6,8 @@ suppressPackageStartupMessages({
 
 .load_lpsA_Y_ <- function() {
     load("raw/lpsA/lpsA.rda")
-    tibble(lpsA$Y)
+    tibble(lpsA$Y) |>
+      mutate(singerNo=gsub("^[A-Z]+","",bioID))
 }
 
 source("cache_db.R")
