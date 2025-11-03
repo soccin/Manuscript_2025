@@ -75,5 +75,5 @@ samtools sort -n $BAM -@ 16 -m 1g \
     > $ODIR/${BASE}.pe.bed.gz
 
 # Map paired-end reads to genomic bins
-Rscript $SDIR/src/map2bins.R $BINS $ODIR/${BASE}.pe.bed.gz
+Rscript $SDIR/src/map2bins.v2.R $BINS $ODIR/${BASE}.pe.bed.gz
 
