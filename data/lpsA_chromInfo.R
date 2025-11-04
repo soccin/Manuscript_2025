@@ -6,7 +6,7 @@ suppressPackageStartupMessages({
 
 .load_lpsA_chromInfo_ <- function() {
     load("raw/lpsA/lpsA.rda")
-    tibble(lpsA$chromInfo) %>% select(1:9)
+    tibble(lpsA$chromInfo) %>% select(1:4,arm,band,width)
 }
 
 source("cache_db.R")
