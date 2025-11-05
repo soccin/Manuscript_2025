@@ -20,7 +20,6 @@ data(lpsA_chromInfo)
 # Order arms, bands correctly
 #
 lpsA_chromInfo=lpsA_chromInfo %>%
-    mutate(band=gsub(".$","",arm)) %>%
     mutate(band=factor(band,levels=unique(band))) %>%
     mutate(arm=factor(arm,levels=unique(arm)))
 
@@ -34,7 +33,7 @@ genesI=lpsA_gene.index %>%
     filter(hgnc.symbol %in% genes) %>%
     select(gene=hgnc.symbol,chrom,start,end,arm,bin.id)
 
-mapSamps=map_vec(strsplit(basename(fs::dir_ls("../Circos",regex="maps_.*rds")),"_"),2)
+mapSamps=map_vec(strsplit(basename(fs::dir_ls("data/raw/maps/v2023",regex="maps_.*rds")),"_"),2)
 
 BLSAMPS=FALSE
 if(!BLSAMPS) {
@@ -58,11 +57,15 @@ if(!BLSAMPS) {
 sid="WD0539P"
 ct="Adv.Tumor"
 
-ymax=read_csv("YMAX_Intra12.csv")
-ymax=transpose(ymax)
-names(ymax)=map_vec(ymax,"sid")
+if(file.exists("YMAX_Intra12.csv")) {
+  ymax=read_csv("YMAX_Intra12.csv")
+  ymax=transpose(ymax)
+  names(ymax)=map_vec(ymax,"sid")
+}
 
 pp=list()
+sampleIDs=sid
+halt("DDDDDD")
 for(sid in sampleIDs) {
     cat("sid =",sid,"\n")
 

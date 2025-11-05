@@ -1,20 +1,15 @@
 x11 = function (...) grDevices::x11(...,type='cairo')
 
 require(ggnewscale)
+data(lpsA_chromInfo)
 
-plot_genomic_links<-function(sid,ct,boi,YMAX) {
+plot_genomic_links<-function(ob,sampleID,subSet,YMAX=NULL) {
 
-    # boi == bins of interest
-
-    ob=get_links(sid,ct)
-
-    #
-    # tcn plotting data.frame
-    #
+    #filter(bin.id %in% ob$tcnFilterBins) %>%
 
     dt=ob$cnv %>%
         left_join(lpsA_chromInfo) %>%
-        filter(bin.id %in% boi) %>%
+        filter(med.tcn>4) %>%
         select(bin.id,bin.chrom,arm,band,med.tcn)
 
     #
@@ -63,12 +58,11 @@ plot_genomic_links<-function(sid,ct,boi,YMAX) {
             coord_cartesian(expand=F) +
             ylab("Median Copy Number") +
             xlab(NULL) +
-            ggtitle(paste(sid,ct))
+            ggtitle(paste("Sample:",sampleID,"subSet:",subSet,"Ncells:",ob$nCells))
 
     tcn=dp %>% select(bin.id,bin.coor=R,med.tcn)
 
     links=ob$links %>%
-        filter(Type != "A->A[!12]") %>%
         left_join(tcn,by=c(BIN1="bin.id")) %>%
         rename(bin.coor.1=bin.coor,tcn.1=med.tcn) %>%
         left_join(tcn,by=c(BIN2="bin.id")) %>%
@@ -88,11 +82,12 @@ plot_genomic_links<-function(sid,ct,boi,YMAX) {
 
     xaxis=dp %>% group_by(arm) %>% summarize(mid=(min(R)+max(R))/2)
 
-    linkTypes=c("12->12", "12->A", "A->B")
+    linkTypes=c("12->12", "12->A", "A->B", "A->A[!12]")
     linkCols=c(
         RColorBrewer::brewer.pal(5,"Purples")[5],
         RColorBrewer::brewer.pal(5,"Oranges")[5],
-        RColorBrewer::brewer.pal(5,"Greens")[5]
+        RColorBrewer::brewer.pal(5,"Greens")[5],
+        RColorBrewer::brewer.pal(5,"Blues")[5]
     )
 
     names(linkCols)=linkTypes
@@ -101,28 +96,47 @@ plot_genomic_links<-function(sid,ct,boi,YMAX) {
         YMAX=1.25*max(tcn$med.tcn,na.rm=T)
     }
 
+    # p1=p0 +
+    #     geom_curve(
+    #         aes(x=bin.coor.1,xend=bin.coor.2,y=tcn.1,yend=tcn.2,color=Type),
+    #         dat=links,curvature=.225,alpha=.4
+    #     ) +
+    #     scale_y_continuous(limits=c(0,YMAX*1.25)) +
+    #     scale_x_continuous(limits=c(xrng[1]-5,xrng[2]+5),breaks=xaxis$mid,labels=xaxis$arm) +
+    #     scale_color_manual(values=linkCols,breaks=names(linkCols)) +
+    #     new_scale_color() +
+    #     geom_step(aes(color=band.color,group=1),data=dp,alpha=.85,lwd=1) +
+    #     scale_color_manual(values=bcls,breaks=names(bcls)) +
+    #     theme(
+    #         panel.grid.major.x = element_blank(),
+    #         panel.grid.minor.x = element_blank(),
+    #         legend.position="none"
+    #     )
 
     p1=p0 +
-        geom_curve(
-            aes(x=bin.coor.1,xend=bin.coor.2,y=tcn.1,yend=tcn.2,color=Type),
-            dat=links,curvature=.225,alpha=.4
-        ) +
         scale_y_continuous(limits=c(0,YMAX*1.25)) +
         scale_x_continuous(limits=c(xrng[1]-5,xrng[2]+5),breaks=xaxis$mid,labels=xaxis$arm) +
-        scale_color_manual(values=linkCols,breaks=names(linkCols)) +
-        new_scale_color() +
         geom_step(aes(color=band.color,group=1),data=dp,alpha=.85,lwd=1) +
         scale_color_manual(values=bcls,breaks=names(bcls)) +
         theme(
             panel.grid.major.x = element_blank(),
             panel.grid.minor.x = element_blank(),
             legend.position="none"
-        )
+        ) +
+        new_scale_color() +
+        geom_curve(
+          aes(x=bin.coor.1,xend=bin.coor.2,y=tcn.1,yend=tcn.2,color=Type),
+          dat=links,curvature=.225,alpha=.4
+        ) +
+        scale_color_manual(values=linkCols,breaks=names(linkCols))
 
-    hmga2_binid=lpsA_gene.index %>% filter(hgnc.symbol=="HMGA2") %>% pull(bin.id)
-    hmga2_R=dp %>% filter(bin.id==hmga2_binid) %>% pull(R)
-    cat("HMGA2 coor",hmga2_binid,hmga2_R,"\n")
-    p1 + geom_vline(xintercept=hmga2_R,alpha=.3333) + annotate("text",x=hmga2_R,y=0.5,label=" HMGA2",size=3,hjust=0)
+
+    p1
+
+    # hmga2_binid=lpsA_gene.index %>% filter(hgnc.symbol=="HMGA2") %>% pull(bin.id)
+    # hmga2_R=dp %>% filter(bin.id==hmga2_binid) %>% pull(R)
+    # cat("HMGA2 coor",hmga2_binid,hmga2_R,"\n")
+    # p1 + geom_vline(xintercept=hmga2_R,alpha=.3333) + annotate("text",x=hmga2_R,y=0.5,label=" HMGA2",size=3,hjust=0)
 
 }
 
